@@ -33,19 +33,26 @@ jobs:
 
       - name: Start Spring Boot AI Code Review Agent
         run: |
-          echo "Starting Spring Boot application..."
+          echo "========================================="
+          echo "STARTING SPRING BOOT APPLICATION"
+          echo "========================================="
 
           nohup mvn spring-boot:run > app.log 2>&1 &
 
-          echo "Waiting for Spring Boot app to start..."
+          echo "Waiting for Spring Boot application to start..."
           sleep 40
 
-          echo "Checking if application is running..."
+          echo "========================================="
+          echo "CHECKING APPLICATION HEALTH"
+          echo "========================================="
+
           curl http://localhost:8080/actuator/health || true
 
       - name: Trigger Review API
         run: |
-          echo "Calling Review API..."
+          echo "========================================="
+          echo "TRIGGERING REVIEW API"
+          echo "========================================="
 
           RESPONSE=$(curl -s -X POST "http://localhost:8080/api/reviews/run" \
             -H "Content-Type: application/json" \
@@ -57,8 +64,11 @@ jobs:
             }')
 
           echo "========================================="
-          echo "REVIEW API RESPONSE:"
+          echo "REVIEW API RESPONSE"
+          echo "========================================="
+
           echo "$RESPONSE"
+
           echo "========================================="
 
       - name: Show Spring Boot Logs
@@ -67,5 +77,7 @@ jobs:
           echo "========================================="
           echo "SPRING BOOT APPLICATION LOGS"
           echo "========================================="
+
           cat app.log
+
           echo "========================================="
