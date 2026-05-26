@@ -3,9 +3,6 @@ name: Trigger AI Code Review Agent
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-  push:
-    branches:
-      - "**"
 
 jobs:
   trigger-review-agent:
@@ -30,22 +27,19 @@ jobs:
 
       - name: Start Spring Boot Agent
         run: |
-          echo "Starting Spring Boot AI Code Review Agent..."
           nohup mvn spring-boot:run > app.log 2>&1 &
           sleep 35
-          cat app.log
 
       - name: Trigger Review API
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            PR_PART='"pull_request": {"number": ${{ github.event.pull_request.number }}}'
-          else
-            PR_PART='"pull_request": null'
-          fi
-
-          curl -X POST "http://localhost:8080/api/reviews/github-webhook" \
+          curl -X POST "http://localhost:8080/api/reviews/run" \
             -H "Content-Type: application/json" \
-            -d "{\"action\": \"${{ github.event.action }}\", \"ref\": \"${{ github.ref }}\", \"repository\": {\"name\": \"${{ github.event.repository.name }}\", \"owner\": {\"login\": \"${{ github.repository_owner }}\"}}, ${PR_PART}}"
+            -d '{
+              "owner": "${{ github.repository_owner }}",
+              "repo": "${{ github.event.repository.name }}",
+              "pullRequestNumber": ${{ github.event.pull_request.number }},
+              "createJiraTicket": true
+            }'
 
       - name: Show App Logs
         if: always()
