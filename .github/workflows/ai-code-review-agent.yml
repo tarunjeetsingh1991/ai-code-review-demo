@@ -3,6 +3,9 @@ name: Trigger AI Code Review Agent
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - "**"
 
 jobs:
   trigger-review-agent:
@@ -34,14 +37,15 @@ jobs:
 
       - name: Trigger Review API
         run: |
-          curl -X POST "http://localhost:8080/api/reviews/run" \
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            PR_PART='"pull_request": {"number": ${{ github.event.pull_request.number }}}'
+          else
+            PR_PART='"pull_request": null'
+          fi
+
+          curl -X POST "http://localhost:8080/api/reviews/github-webhook" \
             -H "Content-Type: application/json" \
-            -d '{
-              "owner": "${{ github.repository_owner }}",
-              "repo": "${{ github.event.repository.name }}",
-              "pullRequestNumber": ${{ github.event.pull_request.number }},
-              "createJiraTicket": true
-            }'
+            -d "{\"action\": \"${{ github.event.action }}\", \"ref\": \"${{ github.ref }}\", \"repository\": {\"name\": \"${{ github.event.repository.name }}\", \"owner\": {\"login\": \"${{ github.repository_owner }}\"}}, ${PR_PART}}"
 
       - name: Show App Logs
         if: always()
