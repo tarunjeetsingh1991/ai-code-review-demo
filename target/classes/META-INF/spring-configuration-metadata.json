@@ -1,0 +1,72 @@
+{
+  "groups": [
+    {
+      "name": "agent",
+      "type": "com.example.codereviewagent.config.AgentProperties",
+      "sourceType": "com.example.codereviewagent.config.AgentProperties"
+    },
+    {
+      "name": "github",
+      "type": "com.example.codereviewagent.config.GitHubProperties",
+      "sourceType": "com.example.codereviewagent.config.GitHubProperties"
+    },
+    {
+      "name": "jira",
+      "type": "com.example.codereviewagent.config.JiraProperties",
+      "sourceType": "com.example.codereviewagent.config.JiraProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "agent.create-jira-ticket",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.example.codereviewagent.config.AgentProperties"
+    },
+    {
+      "name": "agent.dry-run",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.example.codereviewagent.config.AgentProperties"
+    },
+    {
+      "name": "agent.post-github-comment",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.example.codereviewagent.config.AgentProperties"
+    },
+    {
+      "name": "github.api-url",
+      "type": "java.lang.String",
+      "sourceType": "com.example.codereviewagent.config.GitHubProperties"
+    },
+    {
+      "name": "github.token",
+      "type": "java.lang.String",
+      "sourceType": "com.example.codereviewagent.config.GitHubProperties"
+    },
+    {
+      "name": "jira.api-token",
+      "type": "java.lang.String",
+      "sourceType": "com.example.codereviewagent.config.JiraProperties"
+    },
+    {
+      "name": "jira.base-url",
+      "type": "java.lang.String",
+      "sourceType": "com.example.codereviewagent.config.JiraProperties"
+    },
+    {
+      "name": "jira.email",
+      "type": "java.lang.String",
+      "sourceType": "com.example.codereviewagent.config.JiraProperties"
+    },
+    {
+      "name": "jira.issue-type",
+      "type": "java.lang.String",
+      "sourceType": "com.example.codereviewagent.config.JiraProperties"
+    },
+    {
+      "name": "jira.project-key",
+      "type": "java.lang.String",
+      "sourceType": "com.example.codereviewagent.config.JiraProperties"
+    }
+  ],
+  "hints": []
+}

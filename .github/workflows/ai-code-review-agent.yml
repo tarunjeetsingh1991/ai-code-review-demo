@@ -1,0 +1,20 @@
+name: Trigger AI Code Review Agent
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  trigger-review-agent:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Skip Build And Trigger Review Agent
+        env:
+          AGENT_URL: ${{ secrets.AGENT_URL }}
+          GITHUB_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPO: ${{ github.event.repository.name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          echo "Build skipped as requested."
+          curl -X POST "$AGENT_URL/api/reviews/run"             -H "Content-Type: application/json"             -d "{"owner":"$GITHUB_OWNER","repo":"$GITHUB_REPO","pullRequestNumber":$PR_NUMBER}"
