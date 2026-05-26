@@ -21,7 +21,8 @@ public class CodeReviewController {
     @GetMapping("/home")
     public String getHomePage()
     {
-    	return "<h1> Home Page </h1>";
+        System.out.println("password=123");
+    	return "<h1> Home Page </h1>";   
     }
     @PostMapping("/run")
     public ResponseEntity<ReviewResponse> runManualReview(@Valid @RequestBody ReviewRequest request) {
