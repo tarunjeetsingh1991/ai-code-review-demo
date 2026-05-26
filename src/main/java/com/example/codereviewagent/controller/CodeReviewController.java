@@ -17,7 +17,12 @@ public class CodeReviewController {
     public CodeReviewController(CodeReviewAgentService service) {
         this.service = service;
     }
-
+    
+    @GetMapping("/home")
+    public String getHomePage()
+    {
+    	return "<h1> Home Page </h1>";
+    }
     @PostMapping("/run")
     public ResponseEntity<ReviewResponse> runManualReview(@Valid @RequestBody ReviewRequest request) {
         return ResponseEntity.ok(service.reviewPullRequest(request));
