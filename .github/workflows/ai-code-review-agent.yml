@@ -8,15 +8,42 @@ jobs:
   trigger-review-agent:
     runs-on: ubuntu-latest
 
+    env:
+      GH_PAT: ${{ secrets.GH_PAT }}
+      JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+      JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+      JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+      JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY }}
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Skip Build And Trigger Review Agent
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Start Spring Boot Agent
         run: |
-          echo "Build skipped as requested."
-          echo "AI Code Review Agent Triggered Successfully"
-          echo "Reviewing Pull Request..."
-          echo "Checking Specifications..."
-          echo "Creating Jira Ticket..."
-          echo "Posting GitHub Review Comment..."
+          echo "Starting Spring Boot AI Code Review Agent..."
+          nohup mvn spring-boot:run > app.log 2>&1 &
+          sleep 35
+          cat app.log
+
+      - name: Trigger Review API
+        run: |
+          curl -X POST "http://localhost:8080/api/reviews/run" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "owner": "${{ github.repository_owner }}",
+              "repo": "${{ github.event.repository.name }}",
+              "pullRequestNumber": ${{ github.event.pull_request.number }},
+              "createJiraTicket": true
+            }'
+
+      - name: Show App Logs
+        if: always()
+        run: |
+          cat app.log
