@@ -2,19 +2,82 @@ name: Trigger AI Code Review Agent
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 jobs:
   trigger-review-agent:
     runs-on: ubuntu-latest
 
+    env:
+      GH_PAT: ${{ secrets.GH_PAT }}
+      JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+      JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+      JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+      JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY }}
+
     steps:
-      - name: Skip Build And Trigger Review Agent
-        env:
-          AGENT_URL: ${{ secrets.AGENT_URL }}
-          GITHUB_OWNER: ${{ github.repository_owner }}
-          GITHUB_REPO: ${{ github.event.repository.name }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Verify Java Version
+        run: java -version
+
+      - name: Start Spring Boot AI Code Review Agent
         run: |
-          echo "Build skipped as requested."
-          curl -X POST "$AGENT_URL/api/reviews/run"             -H "Content-Type: application/json"             -d "{"owner":"$GITHUB_OWNER","repo":"$GITHUB_REPO","pullRequestNumber":$PR_NUMBER}"
+          echo "========================================="
+          echo "STARTING SPRING BOOT APPLICATION"
+          echo "========================================="
+
+          nohup mvn spring-boot:run > app.log 2>&1 &
+
+          echo "Waiting for Spring Boot application to start..."
+          sleep 40
+
+          echo "========================================="
+          echo "CHECKING APPLICATION HEALTH"
+          echo "========================================="
+
+          curl http://localhost:8080/actuator/health || true
+
+      - name: Trigger Review API
+        run: |
+          echo "========================================="
+          echo "TRIGGERING REVIEW API"
+          echo "========================================="
+
+          RESPONSE=$(curl -s -X POST "http://localhost:8080/api/reviews/run" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "owner": "${{ github.repository_owner }}",
+              "repo": "${{ github.event.repository.name }}",
+              "pullRequestNumber": ${{ github.event.pull_request.number }},
+              "createJiraTicket": true
+            }')
+
+          echo "========================================="
+          echo "REVIEW API RESPONSE"
+          echo "========================================="
+
+          echo "$RESPONSE"
+
+          echo "========================================="
+
+      - name: Show Spring Boot Logs
+        if: always()
+        run: |
+          echo "========================================="
+          echo "SPRING BOOT APPLICATION LOGS"
+          echo "========================================="
+
+          cat app.log
+
+          echo "========================================="

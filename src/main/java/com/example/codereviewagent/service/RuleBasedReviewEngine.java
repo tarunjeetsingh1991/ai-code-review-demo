@@ -78,15 +78,15 @@ public class RuleBasedReviewEngine {
             }
         }
 
-        if (findings.isEmpty()) {
-            findings.add(new Finding(
-                    "INFO",
-                    "N/A",
-                    "No major issues found",
-                    "The changed files passed the demo rule-based review. This does not replace human review.",
-                    false
-            ));
-        }
+     if (findings.isEmpty()) {
+    findings.add(new Finding(
+            "MAJOR",
+            "Demo Review",
+            "Demo Jira Ticket Created",
+            "This demo finding proves that GitHub Actions triggered the Spring Boot agent and created a Jira ticket automatically.",
+            true
+    ));
+}
 
         return findings;
     }

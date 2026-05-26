@@ -9,6 +9,7 @@ import com.example.codereviewagent.dto.ReviewRequest;
 import com.example.codereviewagent.dto.ReviewResponse;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.List;
 
 @Service
@@ -68,7 +69,10 @@ public class CodeReviewAgentService {
                 .toList();
 
         if (!properties.isDryRun() && properties.isCreateJiraTicket()) {
+                System.out.println("Creating Jira tickets...");
+                System.out.println("Jira findings count: " + jiraFindings.size());
             for (Finding finding : jiraFindings) {
+                System.out.println("Creating Jira issue for: " + finding.title());
                 jiraClient.createIssue(finding, request.owner(), request.repo(), request.pullRequestNumber());
             }
             jiraStatus = "Created " + jiraFindings.size() + " Jira ticket(s)";
@@ -89,5 +93,9 @@ public class CodeReviewAgentService {
                 githubStatus,
                 jiraStatus
         );
+    }
+
+    public Optional<Integer> findOpenPullRequestNumber(String owner, String repo, String branch) {
+        return gitHubClient.findOpenPullRequestNumber(owner, repo, branch);
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.web.client.RestClient;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class GitHubClient {
@@ -52,5 +53,25 @@ public class GitHubClient {
                 .toBodilessEntity();
     }
 
+    public Optional<Integer> findOpenPullRequestNumber(String owner, String repo, String branch) {
+        String url = properties.getApiUrl()
+                + "/repos/" + owner + "/" + repo + "/pulls?state=open&head="
+                + owner + ":" + branch + "&per_page=1";
+
+        GitHubPull[] pulls = restClient.get()
+                .uri(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + properties.getToken())
+                .header(HttpHeaders.ACCEPT, "application/vnd.github+json")
+                .retrieve()
+                .body(GitHubPull[].class);
+
+        if (pulls == null || pulls.length == 0 || pulls[0] == null) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(pulls[0].number());
+    }
+
     private record GitHubFile(String filename, String status, String patch) {}
+    private record GitHubPull(Integer number) {}
 }
